@@ -1,3 +1,5 @@
+HAloo para dewan juri
+
 # 🌙 BarokahGen - The Ultimate AI Ramadan Poster Generator
 
 <div align="center">
