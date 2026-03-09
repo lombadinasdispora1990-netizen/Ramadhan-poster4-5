@@ -2,66 +2,15 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wand2, AlertCircle, CheckCircle2, Sparkles, Image, Type, Box, Paintbrush, Zap, Sword, Theater, Leaf, Shield, UserPlus, Flame, Heart } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
-import { generateGreetingText } from '../utils/api';
+import { generateGreetingText, saveGenerationToDB, cleanGeneratedText } from '../utils/api';
 import { getSystemPrompt } from '../utils/promptEngine';
 import { transformWithMode } from '../utils/imageTransformAdvanced';
 import { convertImageUrlToBase64 } from '../utils/imageToBase64';
-
-/**
- * Clean generated text from AI response
- */
-const cleanGeneratedText = (text) => {
-  if (!text) return '';
-
-  let cleaned = text.trim();
-  cleaned = cleaned.replace(/\*\*(.+?)\*\*/g, '$1');
-  cleaned = cleaned.replace(/\*(.+?)\*/g, '$1');
-  cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
-  cleaned = cleaned.replace(/`(.+?)`/g, '$1');
-  cleaned = cleaned.replace(/\*?\(?\d+\s*kata\)?\*?/gi, '');
-  cleaned = cleaned.replace(/\(.*?kata.*?\)/gi, '');
-  cleaned = cleaned.replace(/^(Tentu!|Here is|Here's|Berikut|Ini adalah|Nah,|Oke,)\s*/i, '');
-
-  const lines = cleaned.split('\n');
-  const greetingLine = lines.find(line => {
-    const lowerLine = line.toLowerCase().trim();
-    if (lowerLine.includes('berikut') ||
-      lowerLine.includes('ucapan') ||
-      lowerLine.includes('singkat') ||
-      lowerLine.includes('≤15 kata') ||
-      lowerLine.includes('gaya') ||
-      lowerLine.includes('maksimal') ||
-      lowerLine.includes('contoh') ||
-      lowerLine.includes('aturan')) {
-      return false;
-    }
-    return line.trim().length > 0 && line.length < 100;
-  });
-
-  if (greetingLine) {
-    cleaned = greetingLine.trim();
-  }
-
-  cleaned = cleaned.replace(/^["']|["']$/g, '');
-  cleaned = cleaned.replace(/\(\d+\)/g, '');
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-
-  const words = cleaned.split(/\s+/);
-  if (words.length > 15) {
-    cleaned = words.slice(0, 15).join(' ') + '...';
-  }
-
-  console.log('🧹 Cleaning steps:', {
-    original: text.substring(0, 100),
-    afterMarkdown: cleaned.substring(0, 100),
-    final: cleaned
-  });
-
-  return cleaned;
-};
+import { useAuth } from '../context/AuthContext';
 
 const ActionButtons = () => {
   const [retryCount, setRetryCount] = useState(0);
+  const { user } = useAuth();
   const {
     uploadedImage,
     uploadedImage2,
@@ -73,6 +22,8 @@ const ActionButtons = () => {
     isGenerated,
     isTransformed,
     generationMode,
+    transformedImage,
+    generatedText,
     setLoading,
     setError,
     setGeneratedText,
@@ -107,6 +58,7 @@ const ActionButtons = () => {
     setRetryCount(prev => prev + 1);
 
     try {
+      let currentTransformedImage = null;
       if (generationMode !== 'text-only') {
         console.log('🎨 Step 1: Starting image transformation with mode:', generationMode);
         setTransforming(true);
@@ -123,10 +75,12 @@ const ActionButtons = () => {
             console.log('🔄 Converting to base64 before URL expires...');
             try {
               const base64Image = await convertImageUrlToBase64(transformResult.imageUrl);
+              currentTransformedImage = base64Image;
               setTransformedImage(base64Image);
               console.log('✅ Image saved as base64 data URL — no more CORS issues!');
             } catch (conversionError) {
               console.warn('⚠️ Base64 conversion failed, using original URL:', conversionError.message);
+              currentTransformedImage = transformResult.imageUrl;
               setTransformedImage(transformResult.imageUrl);
             }
 
@@ -136,6 +90,7 @@ const ActionButtons = () => {
           }
         } catch (transformError) {
           console.warn('⚠️ Image transformation failed, using original image:', transformError);
+          currentTransformedImage = uploadedImage;
           setTransformedImage(uploadedImage);
           setError(`Transformasi gagal: ${transformError.message}. Menggunakan foto asli.`);
         } finally {
@@ -143,22 +98,94 @@ const ActionButtons = () => {
         }
       } else {
         console.log('📝 Text-only mode: Using original image without transformation');
+        currentTransformedImage = null;
         setTransformedImage(null);
       }
 
       console.log('📝 Step 2: Generating greeting text...');
 
-      const generatedText = await generateGreetingText(
+      const rawGreetingText = await generateGreetingText(
         userName,
         greetingType,
         getSystemPrompt()
       );
 
-      const cleanedText = cleanGeneratedText(generatedText);
-      console.log('📝 Raw AI text:', generatedText);
-      console.log('✨ Cleaned text:', cleanedText);
+      const currentCleanedText = cleanGeneratedText(rawGreetingText);
+      console.log('📝 Raw AI text:', rawGreetingText);
+      console.log('✨ Cleaned text:', currentCleanedText);
 
-      setGeneratedText(cleanedText);
+      setGeneratedText(currentCleanedText);
+
+      // Save to database if user is authenticated
+      console.log('🔍 Checking authentication state...');
+      console.log('User object:', user);
+      console.log('Is authenticated:', !!user);
+
+      if (user) {
+        console.log('💾 Saving generation to database...');
+        console.log('Generation data:', {
+          originalImage: uploadedImage ? '✅ Present' : '❌ Missing',
+          transformedImage: currentTransformedImage ? '✅ Present' : '❌ Missing',
+          userName,
+          greetingType,
+          mode: generationMode,
+          text: currentCleanedText
+        });
+
+        try {
+          // Convert transformed image to base64 for storage
+          let posterBase64 = null;
+          if (currentTransformedImage) {
+            console.log('📸 Converting transformed image to base64...');
+            try {
+              // If already base64, use directly
+              if (currentTransformedImage.startsWith('data:')) {
+                posterBase64 = currentTransformedImage;
+              } else {
+                // Convert URL to base64
+                const response = await fetch(currentTransformedImage);
+                const blob = await response.blob();
+                posterBase64 = await new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.readAsDataURL(blob);
+                });
+              }
+              console.log('✅ Image converted to base64, size:', posterBase64.length);
+            } catch (convError) {
+              console.warn('⚠️ Base64 conversion failed, using URL:', convError.message);
+              posterBase64 = currentTransformedImage; // Fallback to URL
+            }
+          }
+
+          const saveResult = await saveGenerationToDB({
+            originalImage: uploadedImage,
+            transformedImage: currentTransformedImage || uploadedImage,
+            uploadedImage2: uploadedImage2,
+            userName: userName,
+            greetingType: greetingType,
+            mode: generationMode,
+            text: currentCleanedText,
+            posterBase64: posterBase64 // Now with base64!
+          });
+
+          console.log('✅ Generation save result:', saveResult);
+          if (saveResult.success) {
+            console.log('✅ Generation saved successfully!');
+            // Trigger history refresh
+            window.dispatchEvent(new CustomEvent('refresh-history'));
+            console.log('🔄 History refresh event dispatched');
+          } else {
+            console.error('⚠️ Save failed:', saveResult.error);
+          }
+        } catch (saveError) {
+          console.error('⚠️ Failed to save generation:', saveError.message);
+          console.error('Stack trace:', saveError.stack);
+          // Don't show error to user, just log it
+        }
+      } else {
+        console.log('ℹ️ User not logged in, skipping database save');
+      }
     } catch (err) {
       console.error('Generation error:', err);
 

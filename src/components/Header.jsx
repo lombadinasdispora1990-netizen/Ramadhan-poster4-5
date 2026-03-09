@@ -1,7 +1,20 @@
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, LogOut, User, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { signOut } from '../utils/supabase';
 
-const Header = () => {
+const Header = ({ onLogin }) => {
+  const { user, isAuthenticated } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      console.log('Logged out successfully');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -49,15 +62,41 @@ const Header = () => {
           <span>AI-Powered</span>
         </motion.div>
 
-        {/* Right: Powered by */}
+        {/* Right: User Menu or Login Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
-          className="hidden sm:flex items-center gap-2 text-xs text-gray-500"
+          className="flex items-center gap-3"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
-          <span>Powered by Alibaba Cloud</span>
+          {isAuthenticated ? (
+            <>
+              {/* User info */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                <User className="w-4 h-4 text-brand-400" />
+                <span className="text-xs text-gray-300">{user.email}</span>
+              </div>
+              
+              {/* Logout button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-medium"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </>
+          ) : (
+            /* Login button */
+            <button
+              onClick={onLogin}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg btn-primary text-sm font-medium"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Sign In</span>
+            </button>
+          )}
         </motion.div>
       </div>
 
