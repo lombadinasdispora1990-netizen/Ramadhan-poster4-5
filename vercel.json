@@ -1,6 +1,10 @@
 {
     "rewrites": [
         {
+            "source": "/api/proxy-image",
+            "destination": "/api/proxy-image.js"
+        },
+        {
             "source": "/api/alibaba/(.*)",
             "destination": "https://dashscope-intl.aliyuncs.com/$1"
         },

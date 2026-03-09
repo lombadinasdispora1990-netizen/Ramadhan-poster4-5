@@ -133,30 +133,14 @@ const ActionButtons = () => {
         });
 
         try {
-          // Convert transformed image to base64 for storage
-          let posterBase64 = null;
-          if (currentTransformedImage) {
-            console.log('📸 Converting transformed image to base64...');
-            try {
-              // If already base64, use directly
-              if (currentTransformedImage.startsWith('data:')) {
-                posterBase64 = currentTransformedImage;
-              } else {
-                // Convert URL to base64
-                const response = await fetch(currentTransformedImage);
-                const blob = await response.blob();
-                posterBase64 = await new Promise((resolve) => {
-                  const reader = new FileReader();
-                  reader.onloadend = () => resolve(reader.result);
-                  reader.readAsDataURL(blob);
-                });
-              }
-              console.log('✅ Image converted to base64, size:', posterBase64.length);
-            } catch (convError) {
-              console.warn('⚠️ Base64 conversion failed, using URL:', convError.message);
-              posterBase64 = currentTransformedImage; // Fallback to URL
-            }
-          }
+          // The transformed image is already converted to base64 earlier (currentTransformedImage)
+          // to prevent CORS and expiration issues. We can use it directly.
+          const posterBase64 = currentTransformedImage;
+
+          console.log('📸 Preparation for database:', {
+            hasBase64: !!posterBase64,
+            size: posterBase64?.length || 0
+          });
 
           const saveResult = await saveGenerationToDB({
             originalImage: uploadedImage,
@@ -166,7 +150,7 @@ const ActionButtons = () => {
             greetingType: greetingType,
             mode: generationMode,
             text: currentCleanedText,
-            posterBase64: posterBase64 // Now with base64!
+            posterBase64: posterBase64
           });
 
           console.log('✅ Generation save result:', saveResult);

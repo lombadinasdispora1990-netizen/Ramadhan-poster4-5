@@ -23,6 +23,12 @@ const PosterPreview = () => {
   // Standard header height for all modes
   const headerHeight = 'h-[18%]';
 
+  // Helper to get proxied URL for remote images to avoid CORS in html2canvas
+  const getSafeImageUrl = (src) => {
+    if (!src || src.startsWith('data:') || src.startsWith('blob:')) return src;
+    return `/api/proxy-image?url=${encodeURIComponent(src)}`;
+  };
+
   // Capture poster as canvas
   const capturePoster = async () => {
     const posterElement = document.getElementById('poster-preview');
@@ -46,7 +52,6 @@ const PosterPreview = () => {
         }
       });
       console.log('✅ Image ready for capture');
-      console.log('   Image src type:', img.src.startsWith('data:') ? 'base64' : img.src.substring(0, 40) + '...');
     }
 
     console.log('📤 Capturing poster with html2canvas...');
@@ -164,7 +169,7 @@ const PosterPreview = () => {
             <>
               <img
                 key={displayImage}
-                src={displayImage}
+                src={getSafeImageUrl(displayImage)}
                 alt="Poster background"
                 className="absolute inset-0 w-full h-full object-cover vignette-effect"
                 style={{ backgroundColor: '#1a1a2e' }}
