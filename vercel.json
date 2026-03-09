@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/alibaba/(.*)",
+            "destination": "https://dashscope-intl.aliyuncs.com/$1"
+        },
+        {
+            "source": "/compatible-mode/(.*)",
+            "destination": "https://dashscope-intl.aliyuncs.com/compatible-mode/$1"
+        }
+    ]
+}
