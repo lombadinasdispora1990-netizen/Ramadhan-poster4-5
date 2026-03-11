@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, User, Type, Sparkles, ImagePlus, Camera } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
@@ -30,6 +30,8 @@ const HeroSection = () => {
     clearError
   } = useAppStore();
 
+  const fileInputRef = useRef(null);
+  const fileInputRef2 = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
 
   // Handle file upload
@@ -145,117 +147,125 @@ const HeroSection = () => {
               <div className="w-8 h-8 rounded-lg bg-brand-500/15 flex items-center justify-center">
                 <Camera className="w-4 h-4 text-brand-400" />
               </div>
-              Upload Foto
+              Pilih Foto Anda
             </h3>
 
-            {!uploadedImage ? (
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`upload-zone ${isDragging ? 'dragging' : ''}`}
-              >
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            {/* Main Upload Zone */}
+            <div className="space-y-6">
+              {!uploadedImage ? (
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`upload-zone min-h-[220px] flex flex-col items-center justify-center cursor-pointer ${isDragging ? 'dragging' : ''}`}
                 >
-                  <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-                    <Upload className="w-6 h-6 text-gray-400" />
-                  </div>
-                </motion.div>
-                <p className="text-gray-300 text-sm mb-1.5">
-                  Drag & drop foto di sini, atau{' '}
-                  <label className="text-brand-400 cursor-pointer hover:text-brand-300 font-medium transition-colors">
-                    browse
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileInput}
-                      className="hidden"
-                    />
-                  </label>
-                </p>
-                <p className="text-xs text-gray-600">
-                  Support: JPG, PNG, WebP (Max 5MB)
-                </p>
-              </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="relative rounded-xl overflow-hidden group"
-              >
-                <img
-                  src={uploadedImage}
-                  alt="Uploaded"
-                  className="w-full h-48 object-cover"
-                />
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <button
-                    onClick={handleRemoveImage}
-                    className="p-2.5 bg-red-500/90 hover:bg-red-500 rounded-xl transition-colors"
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                  <p className="text-xs text-gray-200 truncate">{imageName}</p>
-                </div>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Second Upload Area - Face Reference */}
-          <div className="glass-card p-6">
-            <h3 className="text-lg font-display font-semibold mb-1.5 flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center">
-                <User className="w-4 h-4 text-purple-400" />
-              </div>
-              Foto Referensi Wajah
-              <span className="badge text-[10px] ml-1">Opsional</span>
-            </h3>
-            <p className="text-xs text-gray-500 mb-4 pl-[42px]">
-              Upload foto wajah yang lebih jelas untuk akurasi yang lebih mirip
-            </p>
-
-            {!uploadedImage2 ? (
-              <div className="border border-dashed border-white/[0.08] rounded-xl p-5 text-center hover:border-purple-400/40 transition-all duration-300 cursor-pointer">
-                <ImagePlus className="w-7 h-7 mx-auto mb-2 text-gray-500" />
-                <label className="text-sm text-purple-400 cursor-pointer hover:text-purple-300 font-medium transition-colors">
-                  Browse
+                    <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                      <Upload className="w-8 h-8 text-brand-400" />
+                    </div>
+                  </motion.div>
+                  <p className="text-gray-200 font-medium mb-2">
+                    Klik atau tarik foto ke sini
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Maksimal 5MB (JPG, PNG, WebP)
+                  </p>
                   <input
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
-                    onChange={handleFileInput2}
+                    onChange={handleFileInput}
                     className="hidden"
                   />
-                </label>
-              </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="relative rounded-xl overflow-hidden group"
-              >
-                <img
-                  src={uploadedImage2}
-                  alt="Face Reference"
-                  className="w-full h-32 object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <button
-                    onClick={handleRemoveImage2}
-                    className="p-2 bg-red-500/90 hover:bg-red-500 rounded-xl transition-colors"
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Primary Image Preview */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative rounded-xl overflow-hidden group border border-white/10"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
+                    <img
+                      src={uploadedImage}
+                      alt="Uploaded"
+                      className="w-full h-56 object-cover"
+                    />
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        onClick={handleRemoveImage}
+                        className="p-3 bg-red-500/90 hover:bg-red-500 rounded-xl transition-colors shadow-lg"
+                        title="Hapus foto"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <p className="text-sm text-white font-medium truncate flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-brand-400" />
+                        {imageName}
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Optional Face Reference - Only shown if main photo exists */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="pt-2 border-t border-white/5"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                        <User className="w-4 h-4 text-purple-400" />
+                        Foto Referensi Wajah (Opsional)
+                      </h4>
+                      {!uploadedImage2 && (
+                        <button 
+                          onClick={() => fileInputRef2.current?.click()}
+                          className="text-xs text-brand-400 hover:text-brand-300 font-medium px-3 py-1.5 rounded-lg bg-brand-500/10 transition-colors"
+                        >
+                          Tambah
+                        </button>
+                      )}
+                    </div>
+                    
+                    {!uploadedImage2 ? (
+                      <p className="text-[11px] text-gray-500 mb-2 italic">
+                        💡 Tips: Tambah foto wajah close-up agar hasil AI lebih mirip dengan Anda.
+                      </p>
+                    ) : (
+                      <div className="relative rounded-lg overflow-hidden group border border-purple-500/20 max-w-[120px]">
+                        <img
+                          src={uploadedImage2}
+                          alt="Face Reference"
+                          className="w-full h-24 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button
+                            onClick={handleRemoveImage2}
+                            className="p-1.5 bg-red-500/90 hover:bg-red-500 rounded-lg transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef2}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileInput2}
+                      className="hidden"
+                    />
+                  </motion.div>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                  <p className="text-xs text-gray-200 truncate">{imageName2}</p>
-                </div>
-              </motion.div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Form Inputs */}
