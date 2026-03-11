@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, User, Type, Sparkles, ImagePlus, Camera } from 'lucide-react';
+import { Upload, X, User, Type, Sparkles, Camera, CheckCircle2 } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
 
 const greetingOptions = [
