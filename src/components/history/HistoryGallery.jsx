@@ -66,36 +66,65 @@ const HistoryGallery = ({ user }) => {
     try {
       console.log('⬇️ Downloading generation:', generation.id);
 
-      // Try transformed_image_url first, then original
-      const imageUrl = generation.transformed_image_url || generation.original_image_url;
+      // Use same priority as display: poster_image_url > transformed_image_url > original_image_url
+      const sources = [
+        generation.poster_image_url,
+        generation.transformed_image_url,
+        generation.original_image_url
+      ];
 
-      if (!imageUrl) {
+      let imageSource = null;
+      let sourceType = 'none';
+
+      for (const source of sources) {
+        if (!source) continue;
+        if (source.startsWith('data:')) {
+          if (source.length < 1000) continue; // Skip truncated base64
+          imageSource = source;
+          sourceType = 'base64';
+          break;
+        } else if (source.startsWith('http')) {
+          imageSource = source;
+          sourceType = 'url';
+          break;
+        }
+      }
+
+      if (!imageSource) {
         alert('No image available for this generation');
         return;
       }
 
-      // Use Vite's image proxy to avoid CORS issues
-      const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      console.log('📥 Downloading via:', sourceType);
 
-      console.log('📥 Fetching image from proxy:', proxiedUrl);
+      const fileName = `barokah-gen-${generation.greeting_type}-${generation.id.slice(0, 8)}.png`;
 
-      // Fetch image as blob
-      const response = await fetch(proxiedUrl);
-      if (!response.ok) throw new Error('Failed to fetch image');
+      if (sourceType === 'base64') {
+        // Base64 data URI — download directly, no proxy needed
+        const link = document.createElement('a');
+        link.href = imageSource;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Remote URL — use proxy to avoid CORS
+        const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageSource)}`;
+        const response = await fetch(proxiedUrl);
+        if (!response.ok) throw new Error('Failed to fetch image');
 
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
 
-      // Create download link
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `barokah-gen-${generation.greeting_type}-${generation.id.slice(0, 8)}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-      // Cleanup
-      URL.revokeObjectURL(blobUrl);
+        URL.revokeObjectURL(blobUrl);
+      }
 
       console.log('✅ Download successful');
     } catch (error) {
@@ -103,9 +132,9 @@ const HistoryGallery = ({ user }) => {
       alert('Failed to download. Please try again.');
 
       // Fallback: open in new tab
-      const imageUrl = generation.transformed_image_url || generation.original_image_url;
-      if (imageUrl) {
-        window.open(imageUrl, '_blank');
+      const fallbackUrl = generation.poster_image_url || generation.transformed_image_url || generation.original_image_url;
+      if (fallbackUrl) {
+        window.open(fallbackUrl, '_blank');
       }
     }
   };
