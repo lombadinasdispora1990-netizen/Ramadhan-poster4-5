@@ -270,19 +270,19 @@ const ActionButtons = () => {
         )}
       </AnimatePresence>
 
-      {/* Generate Button */}
-      <div className="flex justify-center">
+      {/* Generate Button Container */}
+      <div className="flex flex-col items-center">
         <motion.button
-          whileHover={{ scale: isLoading ? 1 : 1.03 }}
-          whileTap={{ scale: isLoading ? 1 : 0.97 }}
+          whileHover={{ y: isLoading ? 0 : -2 }}
+          whileTap={{ scale: isLoading ? 1 : 0.98 }}
           onClick={handleGenerate}
           disabled={isLoading || !uploadedImage}
           className={`
-            relative px-10 py-4 rounded-xl font-display font-bold text-lg
-            flex items-center gap-3 transition-all duration-300 overflow-hidden
+            relative px-12 py-5 rounded-xl font-bold text-sm tracking-[0.2em] uppercase
+            flex items-center gap-4 transition-all duration-500 overflow-hidden
             ${isLoading || !uploadedImage
-              ? 'bg-gray-700/50 cursor-not-allowed opacity-40 border border-white/5'
-              : 'btn-primary shadow-glow-green'
+              ? 'bg-slate-900 text-slate-700 cursor-not-allowed opacity-50 border border-white/5'
+              : 'btn-primary shadow-2xl'
             }
           `}
         >
@@ -290,32 +290,27 @@ const ActionButtons = () => {
             <>
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="w-4 h-4 border border-emerald-500/30 border-t-emerald-400 rounded-full"
               />
-              <span className="text-base">
-                {isTransforming ? `Transforming (${generationMode})...` : 'Generating...'}
+              <span className="font-medium lowercase tracking-normal">
+                {isTransforming ? `curating ${generationMode}...` : 'composing...'}
               </span>
             </>
           ) : (
             <>
-              <Wand2 className="w-5 h-5" />
-              Generate {generationMode === 'text-only' ? 'Text' : generationMode === 'realistic' ? 'Realistic' : generationMode.charAt(0).toUpperCase() + generationMode.slice(1)} Poster
+              <Wand2 className="w-4 h-4 text-emerald-400" />
+              Generate Artifact
             </>
           )}
         </motion.button>
+        
+        {!uploadedImage && (
+          <p className="text-slate-600 text-[10px] uppercase tracking-widest mt-6 font-bold">
+            Awaiting Source Portrait
+          </p>
+        )}
       </div>
-
-      {/* Helper Text */}
-      {!uploadedImage && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center text-gray-500 text-sm mt-4"
-        >
-          Upload foto terlebih dahulu untuk membuat poster
-        </motion.p>
-      )}
 
       {/* Info Badges - Inline */}
       <motion.div
@@ -347,13 +342,19 @@ const ActionButtons = () => {
           className="mt-10"
         >
           {/* Section header */}
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-display font-semibold text-white mb-1.5">
-              Pilih Mode Transformasi
-            </h3>
-            <p className="text-sm text-gray-500">
-              {modeOptions.length} mode tersedia — pilih gaya visual favorit Anda
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 px-2">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-2 flex items-center gap-3">
+                <span className="w-6 h-[1px] bg-emerald-500/50" />
+                Artistic Curations
+              </h3>
+              <p className="text-[11px] text-slate-500 font-medium tracking-tight">
+                Select a visual mode to determine the core aesthetic of your final piece.
+              </p>
+            </div>
+            <div className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+              {modeOptions.length} Signature Styles
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
@@ -364,43 +365,28 @@ const ActionButtons = () => {
               return (
                 <motion.button
                   key={option.value}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * index }}
-                  whileHover={{ y: -4 }}
-                  whileTap={{ scale: 0.97 }}
                   onClick={() => setGenerationMode(option.value)}
-                  className={`mode-card ${isSelected ? 'selected' : ''}`}
+                  className={`relative flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-500 group ${isSelected
+                    ? 'bg-emerald-950/20 border-emerald-500/40 shadow-xl ring-1 ring-emerald-500/20'
+                    : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.03]'
+                    }`}
                 >
                   {/* Icon */}
-                  <div
-                    className={`icon-wrapper ${isSelected
-                      ? `bg-gradient-to-br ${option.color}`
-                      : 'bg-white/[0.04] border border-white/[0.06]'
-                      }`}
-                  >
-                    <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-400'}`} />
+                  <div className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center transition-all duration-500 ${isSelected ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white/[0.03] text-slate-500 group-hover:text-slate-300'}`}>
+                    <Icon className="w-5 h-5" />
                   </div>
 
                   {/* Text */}
-                  <div>
-                    <p className={`font-medium text-sm ${isSelected ? 'text-white' : 'text-gray-300'}`}>
-                      {option.label}
-                    </p>
-                    <p className={`text-[10px] mt-0.5 leading-tight ${isSelected ? 'text-brand-200' : 'text-gray-600'}`}>
-                      {option.description}
-                    </p>
-                  </div>
+                  <span className={`text-[11px] font-bold uppercase tracking-widest text-center ${isSelected ? 'text-white' : 'text-slate-500 group-hover:text-slate-400'}`}>
+                    {option.label}
+                  </span>
 
-                  {/* Selected indicator */}
+                  {/* Selection dot */}
                   {isSelected && (
                     <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center shadow-glow-green"
-                    >
-                      <CheckCircle2 className="w-3 h-3 text-white" />
-                    </motion.div>
+                      layoutId="selected-dot"
+                      className="absolute bottom-2 w-1 h-1 rounded-full bg-emerald-500"
+                    />
                   )}
                 </motion.button>
               );

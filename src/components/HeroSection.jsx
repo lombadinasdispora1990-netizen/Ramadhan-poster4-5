@@ -127,19 +127,21 @@ const HeroSection = () => {
     >
       {/* Section Title */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="text-center mb-10"
+        transition={{ duration: 0.8 }}
+        className="text-center mb-16"
       >
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
-          Create Your <span className="gradient-text">Poster</span>
-        </h2>
-        <p className="text-gray-400 text-sm md:text-base max-w-lg mx-auto">
-          Upload foto, pilih gaya, dan biarkan AI membuat poster Ramadan yang memukau untuk Anda
+        <p className="text-emerald-500 font-bold uppercase tracking-[0.3em] text-[10px] mb-4">
+          Experience Excellence
         </p>
-        {/* Animated underline */}
-        <div className="mt-4 mx-auto w-24 h-0.5 bg-gradient-to-r from-brand-400 to-gold-400 rounded-full" />
+        <h2 className="text-4xl md:text-5xl font-display font-medium text-white mb-4 tracking-tight">
+          Create Your <span className="italic font-serif text-emerald-500">Masterpiece</span>
+        </h2>
+        <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+          Craft elegant Ramadan greeting posters powered by high-fidelity AI vision.
+          Select your style and transform your story.
+        </p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -151,12 +153,10 @@ const HeroSection = () => {
           className="space-y-6"
         >
           {/* Upload Area */}
-          <div className="glass-card p-6">
-            <h3 className="text-lg font-display font-semibold mb-4 flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-brand-500/15 flex items-center justify-center">
-                <Camera className="w-4 h-4 text-brand-400" />
-              </div>
-              Pilih Foto Anda
+          <div className="glass-card p-8">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-3">
+              <span className="w-6 h-[1px] bg-emerald-500/50" />
+              Source Material
             </h3>
 
             {/* Hidden Inputs moved outside clickable areas */}
@@ -187,21 +187,16 @@ const HeroSection = () => {
                       fileInputRef.current?.click();
                     }
                   }}
-                  className={`upload-zone min-h-[220px] flex flex-col items-center justify-center cursor-pointer ${isDragging ? 'dragging' : ''}`}
+                  className={`upload-zone min-h-[260px] flex flex-col items-center justify-center cursor-pointer transition-all duration-500 ${isDragging ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-white/[0.01] hover:bg-white/[0.03]'}`}
                 >
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-                      <Upload className="w-8 h-8 text-brand-400" />
-                    </div>
-                  </motion.div>
-                  <p className="text-gray-200 font-medium mb-2 text-center px-4">
-                    Klik atau tarik foto utama ke sini
+                  <div className="w-12 h-12 mb-6 rounded-full border border-white/10 flex items-center justify-center group-hover:border-emerald-500/30 transition-colors">
+                    <Upload className="w-5 h-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
+                  </div>
+                  <p className="text-slate-300 text-sm font-medium mb-1 tracking-tight">
+                    Select primary portrait
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Maksimal 5MB (JPG, PNG, WebP)
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+                    JPEG, PNG, WEBP • Max 5MB
                   </p>
                 </div>
               ) : (
@@ -292,135 +287,99 @@ const HeroSection = () => {
                   </div>
                 </div>
               )}
-            </div>
           </div>
+        </div>
 
-          {/* Form Inputs */}
-          <div className="glass-card p-6 space-y-5">
-            <h3 className="text-lg font-display font-semibold flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gold-500/15 flex items-center justify-center">
-                <Type className="w-4 h-4 text-gold-400" />
-              </div>
-              Detail Poster
+        {/* Form Inputs */}
+          <div className="glass-card p-8 space-y-8">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-3">
+              <span className="w-6 h-[1px] bg-emerald-500/50" />
+              Poster Details
             </h3>
 
-            {/* AI Transform Toggle */}
-            {uploadedImage && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-xl bg-gradient-to-r from-purple-500/[0.06] to-blue-500/[0.06] border border-purple-500/20"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-display font-semibold text-purple-300 text-sm mb-1">
-                      Transformasi Busana Islami
-                    </h4>
-                    <p className="text-[11px] text-gray-400 mb-2 leading-relaxed">
-                      AI akan mengubah foto Anda dengan busana Islami (pria: koko + kupiah, wanita: gamis + jilbab)
-                    </p>
-                    {isTransformed ? (
-                      <div className="flex items-center gap-2 text-brand-400 text-xs font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Foto sudah ditransformasi!</span>
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-yellow-400/80">
-                        💡 Fitur ini akan tersedia setelah generate poster pertama
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
             {/* Name Input */}
-            <div>
-              <label className="block text-xs text-gray-400 mb-2 font-medium flex items-center gap-2">
-                <User className="w-3.5 h-3.5" />
-                Nama Pengirim (Opsional)
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                Sender Name <span className="text-slate-700 italic">(Optional)</span>
               </label>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="Contoh: Ahmad, Keluarga Besar, dll"
-                className="input-premium"
+                placeholder="The Ahmad Family, etc."
+                className="input-premium py-4"
               />
             </div>
 
             {/* Greeting Type Selection */}
-            <div>
-              <label className="block text-xs text-gray-400 mb-3 font-medium flex items-center gap-2">
-                <Type className="w-3.5 h-3.5" />
-                Jenis Ucapan
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Atmosphere & Mood
               </label>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 {greetingOptions.map((option) => (
-                  <motion.button
+                  <button
                     key={option.value}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     onClick={() => setGreetingType(option.value)}
-                    className={`p-3 rounded-xl border transition-all duration-300 text-left ${greetingType === option.value
-                      ? 'bg-brand-500/10 border-brand-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
-                      : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.04]'
+                    className={`p-4 rounded-xl border text-left transition-all duration-500 ${greetingType === option.value
+                      ? 'bg-emerald-950/20 border-emerald-500/40 shadow-lg'
+                      : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.03]'
                       }`}
                   >
-                    <span className="text-xl mb-1 block">{option.icon}</span>
-                    <span className="font-medium text-sm block text-white">{option.label}</span>
-                    <span className="text-[11px] text-gray-500">{option.description}</span>
-                  </motion.button>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">{option.icon}</span>
+                      {greetingType === option.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      )}
+                    </div>
+                    <span className="font-bold text-xs block text-slate-200 tracking-tight">{option.label}</span>
+                    <span className="text-[10px] text-slate-500 font-medium leading-relaxed">{option.description}</span>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Right Column - Decorative / Preview Placeholder */}
+        {/* Right Column - Descriptive Info */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="lg:pl-8 flex flex-col justify-center"
         >
-          <div className="relative w-full max-w-sm">
-            {/* Decorative background */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-30">
-              <div className="w-72 h-72 bg-gradient-to-br from-brand-500/20 to-gold-500/20 rounded-full blur-3xl" />
+          <div className="relative p-10 rounded-2xl border border-white/[0.03] bg-gradient-to-b from-white/[0.02] to-transparent">
+            <div className="mb-10">
+              <Sparkles className="w-6 h-6 text-emerald-500 mb-6" />
+              <h3 className="font-display font-medium text-2xl text-white mb-4">
+                Atelier Standards
+              </h3>
+              <p className="text-sm text-slate-400 leading-loose">
+                Our AI engine utilizes high-resolution latent diffusion to preserve your identity while 
+                applying authentic Islamic aesthetics. Every transformation is curated for 
+                dignity and cultural elegance.
+              </p>
             </div>
 
-            {/* Content */}
-            <div className="relative text-center py-16">
-              {/* Floating AI badge */}
-              <motion.div
-                animate={{ y: [0, -12, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-500/20 to-brand-600/10 border border-brand-500/20 flex items-center justify-center"
-              >
-                <Sparkles className="w-8 h-8 text-brand-400" />
-              </motion.div>
-
-              <h3 className="font-display font-semibold text-lg text-white mb-2">
-                Poster Preview
-              </h3>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
-                Upload foto dan pilih jenis ucapan, lalu klik Generate untuk melihat hasil AI ✨
-              </p>
-
-              {/* Decorative dots */}
-              <div className="flex items-center justify-center gap-1.5 mt-6">
-                {[0, 1, 2].map((i) => (
-                  <motion.div
-                    key={i}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-                    className="w-1.5 h-1.5 rounded-full bg-brand-400"
-                  />
-                ))}
+            <div className="space-y-6 border-t border-white/[0.05] pt-10">
+              <div className="flex items-start gap-4">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">Identity Preservation</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">Advanced face-reference tracking ensures consistent resemblance.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-4">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">Curation & Style</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">Choose from 18+ bespoke modes from Realistic to Ethereal Painting.</p>
+                </div>
               </div>
             </div>
           </div>

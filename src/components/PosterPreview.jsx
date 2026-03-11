@@ -155,65 +155,38 @@ const PosterPreview = () => {
       className="w-full max-w-md mx-auto"
     >
       {/* Poster Frame - 4:5 Aspect Ratio */}
-      <div className="relative">
+      <div className="relative group p-1 bg-white/[0.02] rounded-[22px] border border-white/[0.05]">
         <div
           id="poster-preview"
-          className="poster-frame relative w-full aspect-[4/5] rounded-2xl overflow-hidden ornate-border"
+          className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden"
           style={{
-            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3)',
+            boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.8)',
           }}
         >
-
-          {/* Background Image */}
+          {/* Background Image with slight scale on hover could be cool but keep it solid for now */}
           {displayImage ? (
-            <>
+            <div className="absolute inset-0">
               <img
                 key={displayImage}
                 src={getSafeImageUrl(displayImage)}
                 alt="Poster background"
-                className="absolute inset-0 w-full h-full object-cover vignette-effect"
-                style={{ backgroundColor: '#1a1a2e' }}
-                onLoad={() => {
-                  console.log('✅ Background image loaded successfully');
-                  setIsImageLoaded(true);
-                }}
-                onError={(e) => {
-                  console.error('❌ Failed to load background image:', e);
-                  setIsImageLoaded(false);
-                }}
+                className="w-full h-full object-cover"
+                style={{ backgroundColor: '#020617' }}
+                onLoad={() => setIsImageLoaded(true)}
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none" />
-            </>
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pt-10" />
+            </div>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-              <p className="text-gray-400 text-center px-4">
-                📷 Upload foto Anda untuk memulai...
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
+              <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest px-4">
+                Composition Canvas
               </p>
             </div>
           )}
 
           {/* TOP SECTION: Header Band */}
-          <div className={`absolute top-0 left-0 right-0 ${headerHeight} top-banner-gradient flex flex-col items-center justify-center px-4 z-20`}>
-            <div className="absolute inset-0 islamic-pattern opacity-30" />
-
-            <CornerOrnament position="top-left" className={`absolute top-1 left-1 ${ornamentSize}`} />
-            <CornerOrnament position="top-right" className={`absolute top-1 right-1 ${ornamentSize}`} />
-
-            <CornerOrnament position="top-left" className="absolute top-3 left-8 w-8 h-8 md:w-10 md:h-10 ramadan-element opacity-60" />
-            <CornerOrnament position="top-right" className="absolute top-3 right-8 w-8 h-8 md:w-10 md:h-10 ramadan-element opacity-60" />
-
-            <div className="absolute top-2 left-16 w-4 h-4 md:w-5 md:h-5">
-              <svg viewBox="0 0 100 100" fill="#FFD700" opacity="0.7" className="ramadan-element">
-                <path d="M50 0L61 35L98 35L68 57L79 91L50 70L21 91L32 57L2 35L39 35Z" />
-              </svg>
-            </div>
-            <div className="absolute top-2 right-16 w-4 h-4 md:w-5 md:h-5">
-              <svg viewBox="0 0 100 100" fill="#FFD700" opacity="0.7" className="ramadan-element">
-                <path d="M50 0L61 35L98 35L68 57L79 91L50 70L21 91L32 57L2 35L39 35Z" />
-              </svg>
-            </div>
-
-            <div className="relative z-10 mt-6">
+          <div className={`absolute top-0 left-0 right-0 ${headerHeight} flex flex-col items-center justify-center px-6 z-20`}>
+            <div className="relative z-10 mt-8">
               <RamadanHeader
                 arabicText="رمضان مبارك"
                 englishText="Ramadan Mubarak"
@@ -223,81 +196,47 @@ const PosterPreview = () => {
           </div>
 
           {/* CENTER SECTION: Image Safe Zone */}
-          <div className="absolute top-[18%] bottom-[20%] left-0 right-0 z-10">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-transparent pointer-events-none" />
-          </div>
+          <div className="absolute top-[18%] bottom-[20%] left-0 right-0 z-10" />
 
           {/* BOTTOM SECTION: Text Area */}
-          <div className="absolute bottom-0 left-0 right-0 h-[22%] bottom-banner-gradient flex flex-col items-center justify-end pb-6 px-4 z-20">
-            <DecorativeDivider style="simple" />
-
+          <div className="absolute bottom-0 left-0 right-0 h-[22%] flex flex-col items-center justify-end pb-10 px-6 z-20">
             {isGenerated && generatedText ? (
               <GreetingText
                 text={generatedText}
                 userName={userName}
-                showQuotes={true}
+                showQuotes={false}
               />
             ) : (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="text-base md:text-lg text-gray-300 italic text-center px-4"
-              >
-                Preview teks akan muncul di sini setelah generate...
-              </motion.p>
-            )}
-
-            {!isGenerated && (
-              <PosterFooter
-                userName={userName}
-                hashtags={["#RamadanMubarak", "#BarokahGen"]}
-              />
+              <p className="text-[11px] font-medium text-slate-400 italic text-center opacity-40">
+                Awaiting algorithmic inspiration...
+              </p>
             )}
           </div>
-
-          {/* Decorative Border Glow */}
-          <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none z-30" />
         </div>
 
-        {/* Share Button */}
+        {/* Share Button Overlay or Below */}
         {isGenerated && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-5 space-y-3"
-          >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+          <div className="absolute -bottom-10 left-0 right-0 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-y-2 group-hover:translate-y-0">
+             <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleShare}
               disabled={isDownloading}
-              className="w-full py-3.5 btn-primary rounded-xl font-display font-semibold flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-white text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-2xl flex items-center gap-3 transition-colors hover:bg-emerald-50"
             >
-              {isDownloading ? (
+              {isDownloading ? 'Processing...' : (
                 <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                  />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-5 h-5" />
-                  Share Poster
+                  <Share2 className="w-3 h-3" />
+                  Distribute Art
                 </>
               )}
             </motion.button>
-
-            <p className="text-[11px] text-gray-500 text-center">
-              📱 Bagikan poster ke WhatsApp, Instagram, atau media sosial lainnya
-            </p>
-          </motion.div>
+          </div>
         )}
       </div>
+
+      {/* Spacing for Share button when visible */}
+      {isGenerated && <div className="h-16" />}
 
       {/* Info Section */}
       <div className="space-y-3 mt-6">
