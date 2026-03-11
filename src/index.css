@@ -386,12 +386,19 @@ body {
 /* Greeting Text - Elegant Arabic script style */
 .greeting-text {
   font-family: 'Amiri', serif;
-  font-size: 1.5rem;
-  line-height: 1.8;
-  letter-spacing: 0.3px;
+  font-size: 1.15rem; /* Reduced from 1.5rem for better fitting */
+  line-height: 1.35;  /* Reduced from 1.8 to prevent blocking photo */
+  letter-spacing: 0.2px;
   color: #ffffff;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
   font-style: italic;
+}
+
+@media (min-width: 768px) {
+  .greeting-text {
+    font-size: 1.4rem;
+    line-height: 1.45;
+  }
 }
 
 /* Islamic Decorative Pattern */
@@ -494,8 +501,8 @@ body {
 .top-banner-gradient {
   background: linear-gradient(
     180deg,
-    rgba(26, 26, 46, 0.95) 0%,
-    rgba(26, 26, 46, 0.7) 60%,
+    rgba(26, 26, 46, 0.85) 0%, /* Reduced opacity */
+    rgba(26, 26, 46, 0.6) 60%,  /* Reduced opacity */
     transparent 100%
   );
 }
@@ -504,8 +511,8 @@ body {
 .bottom-banner-gradient {
   background: linear-gradient(
     0deg,
-    rgba(26, 26, 46, 0.95) 0%,
-    rgba(26, 26, 46, 0.8) 70%,
+    rgba(26, 26, 46, 0.85) 0%, /* Reduced opacity */
+    rgba(26, 26, 46, 0.65) 70%, /* Reduced opacity */
     transparent 100%
   );
 }
@@ -531,14 +538,21 @@ body {
 /* Arabic Calligraphy Style */
 .arabic-calligraphy {
   font-family: 'Amiri', serif;
-  font-size: 2.5rem;
+  font-size: 2.25rem; /* Slightly smaller for mobile */
   color: #FFD700;
   text-shadow:
     0 0 10px rgba(255, 215, 0, 0.6),
     0 0 30px rgba(255, 215, 0, 0.3),
     0 2px 4px rgba(0, 0, 0, 0.5);
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.25; /* Tighter line height */
+}
+
+@media (min-width: 768px) {
+  .arabic-calligraphy {
+    font-size: 3rem;
+    line-height: 1.4;
+  }
 }
 
 /* Lantern Swing Animation */

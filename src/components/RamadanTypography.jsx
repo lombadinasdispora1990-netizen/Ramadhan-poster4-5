@@ -56,14 +56,14 @@ export const GreetingText = ({
       <div className="greeting-text text-center px-4">
         {showQuotes && <span className="text-3xl text-gold-400 mr-2">"</span>}
         
-        <span className="leading-relaxed">
+        <span className="">
           {text}
         </span>
         
         {showQuotes && <span className="text-3xl text-gold-400 ml-2">"</span>}
 
         {userName && (
-          <p className="mt-4 text-base md:text-lg text-gray-300 font-normal">
+          <p className="mt-2 text-base md:text-lg text-gray-300 font-normal">
             Dari: <span className="text-white font-semibold">{userName}</span>
           </p>
         )}
