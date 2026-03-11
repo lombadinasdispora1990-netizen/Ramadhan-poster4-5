@@ -33,6 +33,7 @@ const HeroSection = () => {
   const fileInputRef = useRef(null);
   const fileInputRef2 = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Handle file upload
   const handleFileUpload = useCallback((file) => {
@@ -90,13 +91,21 @@ const HeroSection = () => {
   }, [handleFileUpload]);
 
   const handleFileInput = useCallback((e) => {
-    const file = e.target.files[0];
-    handleFileUpload(file);
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+      // Reset input value to allow re-uploading same file
+      e.target.value = '';
+    }
   }, [handleFileUpload]);
 
   const handleFileInput2 = useCallback((e) => {
-    const file = e.target.files[0];
-    handleFileUpload2(file);
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload2(file);
+      // Reset input value to allow re-uploading same file
+      e.target.value = '';
+    }
   }, [handleFileUpload2]);
 
   const handleRemoveImage = useCallback(() => {
@@ -150,14 +159,34 @@ const HeroSection = () => {
               Pilih Foto Anda
             </h3>
 
-            {/* Main Upload Zone */}
+            {/* Hidden Inputs moved outside clickable areas */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileInput}
+              className="hidden"
+            />
+            <input
+              ref={fileInputRef2}
+              type="file"
+              accept="image/*"
+              onChange={handleFileInput2}
+              className="hidden"
+            />
+
             <div className="space-y-6">
               {!uploadedImage ? (
                 <div
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={(e) => {
+                    // Prevent bubbling issues
+                    if (e.target === e.currentTarget || e.currentTarget.contains(e.target)) {
+                      fileInputRef.current?.click();
+                    }
+                  }}
                   className={`upload-zone min-h-[220px] flex flex-col items-center justify-center cursor-pointer ${isDragging ? 'dragging' : ''}`}
                 >
                   <motion.div
@@ -168,19 +197,12 @@ const HeroSection = () => {
                       <Upload className="w-8 h-8 text-brand-400" />
                     </div>
                   </motion.div>
-                  <p className="text-gray-200 font-medium mb-2">
-                    Klik atau tarik foto ke sini
+                  <p className="text-gray-200 font-medium mb-2 text-center px-4">
+                    Klik atau tarik foto utama ke sini
                   </p>
                   <p className="text-xs text-gray-500">
                     Maksimal 5MB (JPG, PNG, WebP)
                   </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileInput}
-                    className="hidden"
-                  />
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -195,8 +217,14 @@ const HeroSection = () => {
                       alt="Uploaded"
                       className="w-full h-56 object-cover"
                     />
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-3 bg-brand-500/90 hover:bg-brand-500 rounded-xl transition-colors shadow-lg"
+                        title="Ganti foto"
+                      >
+                        <Camera className="w-6 h-6" />
+                      </button>
                       <button
                         onClick={handleRemoveImage}
                         className="p-3 bg-red-500/90 hover:bg-red-500 rounded-xl transition-colors shadow-lg"
@@ -213,56 +241,55 @@ const HeroSection = () => {
                     </div>
                   </motion.div>
 
-                  {/* Optional Face Reference - Only shown if main photo exists */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="pt-2 border-t border-white/5"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                        <User className="w-4 h-4 text-purple-400" />
-                        Foto Referensi Wajah (Opsional)
-                      </h4>
-                      {!uploadedImage2 && (
-                        <button 
-                          onClick={() => fileInputRef2.current?.click()}
-                          className="text-xs text-brand-400 hover:text-brand-300 font-medium px-3 py-1.5 rounded-lg bg-brand-500/10 transition-colors"
-                        >
-                          Tambah
-                        </button>
-                      )}
-                    </div>
-                    
-                    {!uploadedImage2 ? (
-                      <p className="text-[11px] text-gray-500 mb-2 italic">
-                        💡 Tips: Tambah foto wajah close-up agar hasil AI lebih mirip dengan Anda.
-                      </p>
+                  {/* Optional Face Reference - Subtle & Expandable */}
+                  <div className="pt-2">
+                    {!uploadedImage2 && !showAdvanced ? (
+                      <button 
+                        onClick={() => setShowAdvanced(true)}
+                        className="text-[11px] text-gray-500 hover:text-brand-400 flex items-center gap-1.5 transition-colors mx-auto"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Ingin hasil lebih mirip? (Opsi Lanjutan)
+                      </button>
                     ) : (
-                      <div className="relative rounded-lg overflow-hidden group border border-purple-500/20 max-w-[120px]">
-                        <img
-                          src={uploadedImage2}
-                          alt="Face Reference"
-                          className="w-full h-24 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button
-                            onClick={handleRemoveImage2}
-                            className="p-1.5 bg-red-500/90 hover:bg-red-500 rounded-lg transition-colors"
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="pt-2 border-t border-white/5"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                            <User className="w-4 h-4 text-purple-400" />
+                            Foto Referensi Wajah
+                          </h4>
+                          <button 
+                            onClick={() => uploadedImage2 ? handleRemoveImage2() : fileInputRef2.current?.click()}
+                            className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                              uploadedImage2 
+                                ? 'text-red-400 bg-red-500/10 hover:bg-red-500/20' 
+                                : 'text-brand-400 bg-brand-500/10 hover:bg-brand-500/20'
+                            }`}
                           >
-                            <X className="w-4 h-4" />
+                            {uploadedImage2 ? 'Hapus' : 'Tambah'}
                           </button>
                         </div>
-                      </div>
+                        
+                        {!uploadedImage2 ? (
+                          <p className="text-[11px] text-gray-500 mb-2 italic px-1">
+                            💡 Tambah foto wajah close-up agar hasil AI lebih akurat.
+                          </p>
+                        ) : (
+                          <div className="relative rounded-lg overflow-hidden group border border-purple-500/20 max-w-[120px]">
+                            <img
+                              src={uploadedImage2}
+                              alt="Face Reference"
+                              className="w-full h-24 object-cover"
+                            />
+                          </div>
+                        )}
+                      </motion.div>
                     )}
-                    <input
-                      ref={fileInputRef2}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileInput2}
-                      className="hidden"
-                    />
-                  </motion.div>
+                  </div>
                 </div>
               )}
             </div>
@@ -297,7 +324,7 @@ const HeroSection = () => {
                     </p>
                     {isTransformed ? (
                       <div className="flex items-center gap-2 text-brand-400 text-xs font-medium">
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Foto sudah ditransformasi!</span>
                       </div>
                     ) : (
