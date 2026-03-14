@@ -309,18 +309,12 @@ export const deleteGenerationFromDB = async (generationId) => {
   }
 };
 
-/**
- * Create Mayar payment link
- * @param {string} userId - User ID
- * @param {string} email - User email
- * @returns {Promise<{success: boolean, url?: string, error?: any}>}
- */
 export const createMayarPayment = async (userId, email) => {
   try {
     const MAYAR_API_KEY = import.meta.env.VITE_MAYAR_API_KEY;
     
-    // We use hl/v1/payment/create for headless payment creation
-    const response = await axios.post('https://api.mayar.id/hl/v1/payment/create', {
+    // Use the proxy to avoid CORS and potential header issues
+    const response = await axios.post('/api/mayar/hl/v1/payment/create', {
       name: 'BarokahGen Pro Subscription',
       amount: 100000,
       description: `Pro Subscription for user ${email}`,
