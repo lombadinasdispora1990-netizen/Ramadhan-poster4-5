@@ -36,6 +36,7 @@ serve(async (req) => {
         name: uniqueName,
         email: email,
         amount: 100000,
+        mobile: "081234567890",
         description: `BarokahGen Pro - ${uniqueName}`,
         redirectUrl: "https://barokahgen.vercel.app",
         expiredAt: expiredAt
