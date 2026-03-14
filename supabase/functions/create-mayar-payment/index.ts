@@ -23,7 +23,24 @@ serve(async (req) => {
       })
     }
 
-    console.log(`Creating payment for user: ${email} (${userId})`)
+    // Generate unique identifier and expiration (7 days from now)
+    const timestamp = Date.now()
+    const namePrefix = email.split('@')[0]
+    const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    console.log(`Creating payment for user: ${email} (${userId}) - TS: ${timestamp}`)
+
+    const payload = {
+      name: namePrefix,
+      email: email,
+      amount: 100000,
+      mobile: "081234567890",
+      description: `BarokahGen Pro - ${timestamp}`,
+      redirectUrl: "https://barokahgen.vercel.app",
+      expiredAt: expiredAt
+    }
+
+    console.log("Sending payload to Mayar:", JSON.stringify(payload))
 
     const response = await fetch('https://api.mayar.id/hl/v1/payment/create', {
       method: 'POST',
@@ -31,22 +48,13 @@ serve(async (req) => {
         'Authorization': `Bearer ${MAYAR_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        name: 'BarokahGen Pro Subscription',
-        amount: 100000,
-        description: `Pro Subscription for user ${email}`,
-        email: email,
-        metadata: {
-          user_id: userId,
-          plan: 'monthly_100k'
-        },
-        callback_url: "https://barokahgen.vercel.app", // Fixed callback
-        redirect_url: "https://barokahgen.vercel.app" // Fixed redirect
-      })
+      body: JSON.stringify(payload)
     })
 
     const data = await response.json()
-    console.log("Mayar Response:", data)
+    
+    console.log("Mayar Response Status:", response.status)
+    console.log("Mayar Response Body:", JSON.stringify(data))
 
     return new Response(JSON.stringify(data), {
       status: response.status,
