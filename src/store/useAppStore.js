@@ -18,6 +18,11 @@ const useAppStore = create((set, get) => ({
   generationMode: 'realistic', // Mode selection: 'text-only', 'realistic', '3d', 'anime', 'painting'
   exportQuality: 'high', // Export quality: 'standard', 'high', 'ultra'
   exportFormat: 'png', // Export format: 'png', 'jpeg'
+  
+  // Credit & Subscription state
+  credits: 0,
+  isPremium: false,
+  subscriptionEndDate: null,
 
   // Actions
   setUploadedImage: (image) => set({ uploadedImage: image }),
@@ -52,6 +57,17 @@ const useAppStore = create((set, get) => ({
   setExportQuality: (quality) => set({ exportQuality: quality }),
 
   setExportFormat: (format) => set({ exportFormat: format }),
+
+  // Credit & Subscription actions
+  setCredits: (credits) => set({ credits }),
+  
+  setIsPremium: (isPremium) => set({ isPremium }),
+  
+  setSubscriptionEndDate: (date) => set({ subscriptionEndDate: date }),
+
+  consumeCredit: () => set((state) => ({ 
+    credits: Math.max(0, state.credits - 1) 
+  })),
 
   resetPoster: () => set({
     uploadedImage: null,

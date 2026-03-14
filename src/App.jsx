@@ -11,6 +11,9 @@ import { ArrowUp, LogIn, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import WhatsAppButton from './components/WhatsAppButton';
+import useAppStore from './store/useAppStore';
+import { syncProfile } from './utils/supabase';
+import SubscriptionModal from './components/SubscriptionModal';
 
 
 // Main App Content (with Auth)
@@ -18,6 +21,7 @@ function AppContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { user, isAuthenticated } = useAuth();
+  const { setCredits, setIsPremium, setSubscriptionEndDate } = useAppStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +30,26 @@ function AppContent() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Sync profile data when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await syncProfile(user.id);
+          if (data && !error) {
+            setCredits(data.credits);
+            setIsPremium(data.is_premium);
+            setSubscriptionEndDate(data.subscription_end_date);
+          }
+        } catch (err) {
+          console.error('Error syncing profile:', err);
+        }
+      };
+      
+      fetchProfile();
+    }
+  }, [user, isAuthenticated, setCredits, setIsPremium, setSubscriptionEndDate]);
 
   return (
     <>
@@ -124,6 +148,9 @@ function AppContent() {
       )}
       {/* WhatsApp sticky button */}
       <WhatsAppButton />
+
+      {/* Subscription Modal */}
+      <SubscriptionModal />
     </>
   );
 }

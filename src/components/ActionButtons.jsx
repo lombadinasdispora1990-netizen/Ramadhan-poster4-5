@@ -7,6 +7,8 @@ import { getSystemPrompt } from '../utils/promptEngine';
 import { transformWithMode } from '../utils/imageTransformAdvanced';
 import { convertImageUrlToBase64 } from '../utils/imageToBase64';
 import { useAuth } from '../context/AuthContext';
+import { consumeOneCredit } from '../utils/supabase';
+import { Lock } from 'lucide-react';
 
 const ActionButtons = () => {
   const [retryCount, setRetryCount] = useState(0);
@@ -24,13 +26,17 @@ const ActionButtons = () => {
     generationMode,
     transformedImage,
     generatedText,
+    credits,
+    isPremium,
     setLoading,
     setError,
     setGeneratedText,
     setTransforming,
     setTransformedImage,
     resetPoster,
-    setGenerationMode
+    setGenerationMode,
+    consumeCredit,
+    setCredits
   } = useAppStore();
 
   // Handle Generate Poster
@@ -38,6 +44,29 @@ const ActionButtons = () => {
     if (!uploadedImage) {
       setError('Silakan upload foto terlebih dahulu');
       return;
+    }
+
+    if (credits <= 0) {
+      setError('Kredit habis. Silakan tunggu hingga besok atau berlangganan untuk menambah kredit.');
+      window.dispatchEvent(new CustomEvent('open-subscription-modal'));
+      return;
+    }
+
+    // Deduct credit immediately on click
+    console.log('💳 Consuming credit immediately...');
+    if (user) {
+      try {
+        const { data: newCreditCount, error: creditError } = await consumeOneCredit(user.id);
+        if (creditError) throw creditError;
+        console.log('✅ Credit consumed in DB, new balance:', newCreditCount);
+        setCredits(newCreditCount);
+      } catch (ced) {
+        console.error('⚠️ Failed to deduct credit in DB:', ced);
+        setError('Gagal memproses kredit. Silakan coba lagi.');
+        return; 
+      }
+    } else {
+      consumeCredit();
     }
 
     console.log('🔍 Current state:', {
@@ -156,6 +185,7 @@ const ActionButtons = () => {
           console.log('✅ Generation save result:', saveResult);
           if (saveResult.success) {
             console.log('✅ Generation saved successfully!');
+            
             // Trigger history refresh
             window.dispatchEvent(new CustomEvent('refresh-history'));
             console.log('🔄 History refresh event dispatched');
@@ -214,9 +244,9 @@ const ActionButtons = () => {
     { value: 'chinadrama', label: 'China Drama', icon: Theater, description: 'Elegant Hanfu/Wuxia style', color: 'from-red-600 to-rose-700' },
     { value: 'oilpalm', label: 'Pohon Sawit', icon: Leaf, description: 'Lush plantation aesthetic', color: 'from-green-600 to-lime-700' },
     { value: 'kamenrider', label: 'Kamen Rider', icon: Shield, description: 'High-tech armored hero', color: 'from-gray-700 to-slate-900' },
-    { value: 'cr7', label: 'Bareng CR7', icon: UserPlus, description: 'Greeting with Ronaldo', color: 'from-blue-500 to-indigo-600' },
-    { value: 'kpop', label: 'Kpop Slayers', icon: Flame, description: 'Idol Demon Hunter style', color: 'from-purple-600 to-fuchsia-700' },
-    { value: 'palestine', label: 'Palestine', icon: Heart, description: 'Free Palestine Solidarity', color: 'from-emerald-600 to-green-800' },
+    { value: 'cr7', label: 'Bareng CR7', icon: UserPlus, description: 'Greeting with Ronaldo', color: 'from-blue-500 to-indigo-600', premium: true },
+    { value: 'kpop', label: 'Kpop Slayers', icon: Flame, description: 'Idol Demon Hunter style', color: 'from-purple-600 to-fuchsia-700', premium: true },
+    { value: 'palestine', label: 'Palestine', icon: Heart, description: 'Free Palestine Solidarity', color: 'from-emerald-600 to-green-800', premium: true },
   ];
 
   return (
@@ -361,16 +391,32 @@ const ActionButtons = () => {
             {modeOptions.map((option, index) => {
               const Icon = option.icon;
               const isSelected = generationMode === option.value;
+              const isLocked = option.premium && !isPremium;
 
               return (
                 <motion.button
                   key={option.value}
-                  onClick={() => setGenerationMode(option.value)}
+                  onClick={() => {
+                    if (isLocked) {
+                      window.dispatchEvent(new CustomEvent('open-subscription-modal'));
+                      return;
+                    }
+                    setGenerationMode(option.value);
+                  }}
                   className={`relative flex flex-col items-center justify-center p-5 rounded-2xl border transition-all duration-500 group ${isSelected
                     ? 'bg-emerald-950/20 border-emerald-500/40 shadow-xl ring-1 ring-emerald-500/20'
-                    : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.03]'
+                    : isLocked 
+                      ? 'bg-black/20 border-white/5 opacity-60 cursor-not-allowed'
+                      : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.03]'
                     }`}
                 >
+                  {/* Lock icon for premium */}
+                  {isLocked && (
+                    <div className="absolute top-2 right-2">
+                      <Lock className="w-3 h-3 text-amber-500/50" />
+                    </div>
+                  )}
+
                   {/* Icon */}
                   <div className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center transition-all duration-500 ${isSelected ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white/[0.03] text-slate-500 group-hover:text-slate-300'}`}>
                     <Icon className="w-5 h-5" />

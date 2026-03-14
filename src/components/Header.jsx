@@ -1,10 +1,13 @@
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, LogIn } from 'lucide-react';
+import { Sparkles, LogOut, User, LogIn, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { signOut } from '../utils/supabase';
+import useAppStore from '../store/useAppStore';
+import { useState } from 'react';
 
 const Header = ({ onLogin }) => {
   const { user, isAuthenticated } = useAuth();
+  const { credits, isPremium } = useAppStore();
 
   const handleLogout = async () => {
     try {
@@ -42,17 +45,34 @@ const Header = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Center: Subtle Badge */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Advanced AI Engine</span>
-        </div>
+        {/* Center: Credits Display (When logged in) */}
+        {isAuthenticated && (
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl border border-white/[0.05] bg-white/[0.02] shadow-sm">
+              <Zap className={`w-3.5 h-3.5 ${credits > 0 ? 'text-amber-400' : 'text-slate-500'}`} />
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Credits</span>
+                <span className="text-xs text-white font-display font-bold leading-none">{credits} units</span>
+              </div>
+            </div>
+
+            {!isPremium && (
+              <button 
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-orange-900/20 hover:scale-105 transition-transform"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-subscription-modal'))}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Go Premium
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Right: User Menu */}
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.05]">
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.05]">
                 <User className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-xs text-slate-300 font-medium">{user.email}</span>
               </div>

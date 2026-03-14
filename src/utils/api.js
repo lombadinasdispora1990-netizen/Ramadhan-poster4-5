@@ -308,3 +308,52 @@ export const deleteGenerationFromDB = async (generationId) => {
     return { success: false, error };
   }
 };
+
+/**
+ * Create Mayar payment link
+ * @param {string} userId - User ID
+ * @param {string} email - User email
+ * @returns {Promise<{success: boolean, url?: string, error?: any}>}
+ */
+export const createMayarPayment = async (userId, email) => {
+  try {
+    const MAYAR_API_KEY = import.meta.env.VITE_MAYAR_API_KEY;
+    
+    // We use hl/v1/payment/create for headless payment creation
+    const response = await axios.post('https://api.mayar.id/hl/v1/payment/create', {
+      name: 'BarokahGen Pro Subscription',
+      amount: 100000,
+      description: `Pro Subscription for user ${email}`,
+      email: email,
+      // Metadata allows us to link the payment back to the user in the webhook
+      metadata: {
+        user_id: userId,
+        plan: 'monthly_100k'
+      },
+      // Optional: redirect user back after payment
+      callback_url: window.location.origin,
+      // Fixed amount payment
+      redirect_url: window.location.origin
+    }, {
+      headers: {
+        'Authorization': `Bearer ${MAYAR_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data && response.data.data && response.data.data.link) {
+      return {
+        success: true,
+        url: response.data.data.link
+      };
+    }
+
+    throw new Error('Failed to get payment link from Mayar');
+  } catch (error) {
+    console.error('Mayar API error:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message
+    };
+  }
+};

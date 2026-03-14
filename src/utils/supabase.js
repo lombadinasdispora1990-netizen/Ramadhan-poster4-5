@@ -203,4 +203,33 @@ export const getUserStats = async (userId) => {
   return { data, error };
 };
 
+/**
+ * Sync user profile and credits
+ * @param {string} userId - User ID
+ * @returns {Promise<{data: any, error: any}>}
+ */
+export const syncProfile = async (userId) => {
+  // First refresh credits via RPC
+  const { error: refreshError } = await supabase.rpc('refresh_user_credits', {
+    target_user_id: userId
+  });
+  
+  if (refreshError) console.warn('Credit refresh warning:', refreshError);
+
+  // Then get the latest profile
+  return getProfile(userId);
+};
+
+/**
+ * Decrement one credit from user profile
+ * @param {string} userId - User ID
+ * @returns {Promise<{data: any, error: any}>}
+ */
+export const consumeOneCredit = async (userId) => {
+  const { data, error } = await supabase.rpc('consume_credit', {
+    target_user_id: userId
+  });
+  return { data, error };
+};
+
 export default supabase;
