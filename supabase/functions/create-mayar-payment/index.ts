@@ -30,31 +30,47 @@ serve(async (req) => {
 
     console.log(`Creating payment for user: ${email} (${userId}) - TS: ${timestamp}`)
 
-    const payload = {
-      name: namePrefix,
-      email: email,
-      amount: 100000,
-      mobile: "081234567890",
-      description: `BarokahGen Pro - ${timestamp}`,
-      redirectUrl: "https://barokahgen.vercel.app",
-      expiredAt: expiredAt
+    // Helper to call Mayar API
+    const callMayar = async (uniqueName: string) => {
+      const payload = {
+        name: uniqueName,
+        email: email,
+        amount: 100000,
+        description: `BarokahGen Pro - ${uniqueName}`,
+        redirectUrl: "https://barokahgen.vercel.app",
+        expiredAt: expiredAt
+      }
+
+      console.log("Sending payload to Mayar:", JSON.stringify(payload))
+
+      const response = await fetch('https://api.mayar.id/hl/v1/payment/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${MAYAR_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+      console.log("Mayar Response Status:", response.status)
+      console.log("Mayar Response Body:", JSON.stringify(data))
+      return { response, data }
     }
 
-    console.log("Sending payload to Mayar:", JSON.stringify(payload))
+    // First attempt with timestamp-based unique name
+    let uniqueName = `${namePrefix}-${timestamp}`
+    let { response, data } = await callMayar(uniqueName)
 
-    const response = await fetch('https://api.mayar.id/hl/v1/payment/create', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MAYAR_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    })
-
-    const data = await response.json()
-    
-    console.log("Mayar Response Status:", response.status)
-    console.log("Mayar Response Body:", JSON.stringify(data))
+    // If 409 Conflict, retry once with a more unique name
+    if (response.status === 409) {
+      console.warn("409 Conflict detected, retrying with a more unique name...")
+      const retryTs = Date.now() + Math.floor(Math.random() * 10000)
+      uniqueName = `${namePrefix}-${retryTs}`
+      const retry = await callMayar(uniqueName)
+      response = retry.response
+      data = retry.data
+    }
 
     return new Response(JSON.stringify(data), {
       status: response.status,

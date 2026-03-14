@@ -342,10 +342,8 @@ export const createMayarPayment = async (userId, email) => {
 
     throw new Error(response.data?.message || 'Failed to get payment link from Mayar');
   } catch (error) {
-    console.error('Subscription error:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.message || error.message
-    };
+    console.error('Subscription error FULL:', error.response?.data || error.message);
+    // Re-throw so SubscriptionModal can access the full error.response
+    throw error;
   }
 };

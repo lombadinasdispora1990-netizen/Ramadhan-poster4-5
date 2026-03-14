@@ -33,8 +33,17 @@ const SubscriptionModal = () => {
         throw new Error(result.error || 'Gagal membuat link pembayaran');
       }
     } catch (error) {
-      console.error('Subscription error:', error);
-      alert('Terjadi kesalahan: ' + error.message);
+      console.error('Subscription error FULL:', error);
+      console.error('Subscription error response:', error.response?.data);
+      console.error('Subscription error response DATA array:', JSON.stringify(error.response?.data?.data));
+      
+      const status = error.response?.status;
+      if (status === 409) {
+        alert('Pembayaran sebelumnya masih aktif atau sedang diproses. Silakan tunggu beberapa saat lalu coba lagi.');
+      } else {
+        const detail = error.response?.data?.data ? JSON.stringify(error.response.data.data) : '';
+        alert('Terjadi kesalahan: ' + (error.response?.data?.messages || error.message) + (detail ? ' | Detail: ' + detail : ''));
+      }
     } finally {
       setLoading(false);
     }
