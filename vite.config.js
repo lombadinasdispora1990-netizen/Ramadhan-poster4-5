@@ -129,12 +129,6 @@ export default defineConfig({
         target: 'https://dashscope-intl.aliyuncs.com',
         changeOrigin: true,
       },
-      // Mayar.id proxy
-      '/api/mayar': {
-        target: 'https://api.mayar.id',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/mayar/, ''),
-      }
     }
   }
 })

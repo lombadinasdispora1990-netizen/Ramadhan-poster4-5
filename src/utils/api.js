@@ -309,28 +309,26 @@ export const deleteGenerationFromDB = async (generationId) => {
   }
 };
 
+/**
+ * Create Mayar payment link via Supabase Edge Function
+ * This version is secure as it doesn't expose the Mayar API key to the client
+ * @param {string} userId - User ID
+ * @param {string} email - User email
+ * @returns {Promise<{success: boolean, url?: string, error?: any}>}
+ */
 export const createMayarPayment = async (userId, email) => {
   try {
-    const MAYAR_API_KEY = import.meta.env.VITE_MAYAR_API_KEY;
+    const { data: { session } } = await supabase.auth.getSession();
     
-    // Use the proxy to avoid CORS and potential header issues
-    const response = await axios.post('/api/mayar/hl/v1/payment/create', {
-      name: 'BarokahGen Pro Subscription',
-      amount: 100000,
-      description: `Pro Subscription for user ${email}`,
-      email: email,
-      // Metadata allows us to link the payment back to the user in the webhook
-      metadata: {
-        user_id: userId,
-        plan: 'monthly_100k'
-      },
-      // Optional: redirect user back after payment
-      callback_url: window.location.origin,
-      // Fixed amount payment
-      redirect_url: window.location.origin
+    if (!session) throw new Error('You must be logged in to subscribe');
+
+    // Call Supabase Edge Function
+    const response = await axios.post(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-mayar-payment`, {
+      userId,
+      email
     }, {
       headers: {
-        'Authorization': `Bearer ${MAYAR_API_KEY}`,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json'
       }
     });
@@ -342,9 +340,9 @@ export const createMayarPayment = async (userId, email) => {
       };
     }
 
-    throw new Error('Failed to get payment link from Mayar');
+    throw new Error(response.data?.message || 'Failed to get payment link from Mayar');
   } catch (error) {
-    console.error('Mayar API error:', error.response?.data || error.message);
+    console.error('Subscription error:', error.response?.data || error.message);
     return {
       success: false,
       error: error.response?.data?.message || error.message
