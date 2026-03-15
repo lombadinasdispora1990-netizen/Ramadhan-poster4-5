@@ -14,13 +14,22 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active sessions on mount
+    // Check active sessions on mount with timeout to prevent infinite hang
     const checkUser = async () => {
       try {
-        const currentUser = await getCurrentUser();
+        // Race between auth check and a 5-second timeout
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+        );
+
+        const currentUser = await Promise.race([
+          getCurrentUser(),
+          timeoutPromise
+        ]);
         setUser(currentUser);
       } catch (error) {
-        console.error('Error checking user:', error);
+        console.warn('Auth check failed or timed out:', error.message);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -49,7 +58,62 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #0a0f1a 0%, #0f172a 50%, #0a0f1a 100%)',
+          color: '#fff',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, #064e3b, #022c22)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '24px',
+            boxShadow: '0 0 40px rgba(16, 185, 129, 0.15)',
+          }}>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#d1fae5' }}>B</span>
+          </div>
+          <p style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.3em',
+            color: '#10b981',
+            marginBottom: '8px',
+          }}>Loading</p>
+          <div style={{
+            width: '120px',
+            height: '2px',
+            background: 'rgba(255,255,255,0.05)',
+            borderRadius: '1px',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              width: '40%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent, #10b981, transparent)',
+              borderRadius: '1px',
+              animation: 'shimmer 1.5s ease-in-out infinite',
+            }} />
+          </div>
+          <style>{`
+            @keyframes shimmer {
+              0% { transform: translateX(-100%); }
+              100% { transform: translateX(350%); }
+            }
+          `}</style>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 };
