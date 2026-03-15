@@ -232,4 +232,29 @@ export const consumeOneCredit = async (userId) => {
   return { data, error };
 };
 
+/**
+ * Upload a file (Blob or File) to Supabase Storage
+ * @param {string} bucket - Storage bucket name
+ * @param {string} path - Remote path/filename
+ * @param {Blob|File} fileBody - File data
+ * @returns {Promise<{data: any, error: any}>}
+ */
+export const uploadImage = async (bucket, path, fileBody) => {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(path, fileBody, {
+      cacheControl: '3600',
+      upsert: true
+    });
+    
+  if (error) return { data: null, error };
+  
+  // Get public URL
+  const { data: { publicUrl } } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(path);
+    
+  return { data: { ...data, publicUrl }, error: null };
+};
+
 export default supabase;

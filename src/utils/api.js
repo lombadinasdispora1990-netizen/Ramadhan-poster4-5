@@ -231,7 +231,30 @@ export const generateGreetingText = async (userName, greetingType, systemPrompt)
 export default apiClient;
 
 /**
- * Save generation to Supabase database
+ * Convert base64 string to Blob
+ * @param {string} base64 - Base64 string
+ * @param {string} contentType - Content type
+ * @returns {Blob}
+ */
+const base64ToBlob = (base64, contentType = 'image/png') => {
+  const byteCharacters = atob(base64.split(',')[1] || base64);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  return new Blob(byteArrays, { type: contentType });
+};
+
+/**
+ * Save generation to Supabase database (with Storage for images)
  * @param {object} generationData - Generation data to save
  * @returns {Promise<{success: boolean, data?: any, error?: any}>}
  */
@@ -256,17 +279,43 @@ export const saveGenerationToDB = async (generationData) => {
     const userId = user.id;
     console.log('✅ [saveGenerationToDB] User verified:', userId);
 
-    // Prepare data for database
+    const { uploadImage } = await import('./supabase');
+
+    // Helper to upload if it's base64
+    const uploadIfBase64 = async (imageData, prefix) => {
+      if (!imageData || !imageData.startsWith('data:image')) return imageData;
+      
+      const fileName = `${userId}/${prefix}_${Date.now()}.png`;
+      const blob = base64ToBlob(imageData);
+      
+      const { data, error } = await uploadImage('posters', fileName, blob);
+      if (error) {
+        console.error(`❌ [saveGenerationToDB] Error uploading ${prefix}:`, error);
+        return imageData; // Fallback to base64 if upload fails (though not ideal for IO)
+      }
+      
+      return data.publicUrl;
+    };
+
+    // Upload all images to storage
+    const [originalImg, transformedImg, img2, posterImg] = await Promise.all([
+      uploadIfBase64(generationData.originalImage, 'original'),
+      uploadIfBase64(generationData.transformedImage, 'transformed'),
+      uploadIfBase64(generationData.uploadedImage2, 'reference'),
+      uploadIfBase64(generationData.posterBase64, 'poster')
+    ]);
+
+    // Prepare data for database with URLs
     const dbData = {
       user_id: userId,
-      original_image_url: generationData.originalImage || null,
-      transformed_image_url: generationData.transformedImage || null,
-      uploaded_image2_url: generationData.uploadedImage2 || null,
+      original_image_url: originalImg,
+      transformed_image_url: transformedImg,
+      uploaded_image2_url: img2,
       user_name: generationData.userName || null,
       greeting_type: generationData.greetingType || 'formal',
       generation_mode: generationData.mode || 'realistic',
       generated_text: generationData.text || '',
-      poster_image_url: generationData.posterBase64
+      poster_image_url: posterImg
     };
 
     // Save to database
@@ -279,7 +328,7 @@ export const saveGenerationToDB = async (generationData) => {
       throw error;
     }
 
-    console.log('✅ [saveGenerationToDB] Generation saved successfully!');
+    console.log('✅ [saveGenerationToDB] Generation saved successfully with Storage!');
     return { success: true, data };
   } catch (error) {
     console.error('❌ [saveGenerationToDB] Error saving generation:', error.message);

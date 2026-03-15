@@ -19,8 +19,12 @@ export default async function handler(req, res) {
         const hostname = parsedUrl.hostname.toLowerCase();
 
         // Safety: only allow Alibaba Cloud and DashScope domains to prevent SSRF
-        if (!hostname.endsWith('.aliyuncs.com') && !hostname.endsWith('.dashscope.com') && hostname !== 'aliyuncs.com' && hostname !== 'dashscope.com') {
-            return res.status(400).json({ error: 'Only Alibaba Cloud OSS URLs allowed' });
+        if (!hostname.endsWith('.aliyuncs.com') && 
+            !hostname.endsWith('.dashscope.com') && 
+            !hostname.endsWith('.supabase.co') &&
+            hostname !== 'aliyuncs.com' && 
+            hostname !== 'dashscope.com') {
+            return res.status(400).json({ error: 'Only Alibaba Cloud or Supabase URLs allowed' });
         }
 
         if (parsedUrl.protocol !== 'https:') {

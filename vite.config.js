@@ -38,10 +38,14 @@ function imageProxyPlugin() {
           try {
             const parsedUrl = new URL(targetUrl);
             const hostname = parsedUrl.hostname.toLowerCase();
-            if (!hostname.endsWith('.aliyuncs.com') && !hostname.endsWith('.dashscope.com') && hostname !== 'aliyuncs.com' && hostname !== 'dashscope.com') {
+            if (!hostname.endsWith('.aliyuncs.com') && 
+                !hostname.endsWith('.dashscope.com') && 
+                !hostname.endsWith('.supabase.co') &&
+                hostname !== 'aliyuncs.com' && 
+                hostname !== 'dashscope.com') {
               res.statusCode = 400;
               res.setHeader('Content-Type', 'application/json');
-              return res.end(JSON.stringify({ error: 'Only Alibaba Cloud OSS URLs allowed' }));
+              return res.end(JSON.stringify({ error: 'Only Alibaba Cloud or Supabase URLs allowed' }));
             }
             if (parsedUrl.protocol !== 'https:') {
               res.statusCode = 400;
