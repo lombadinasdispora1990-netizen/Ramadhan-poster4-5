@@ -14,6 +14,7 @@ import WhatsAppButton from './components/WhatsAppButton';
 import useAppStore from './store/useAppStore';
 import { syncProfile } from './utils/supabase';
 import SubscriptionModal from './components/SubscriptionModal';
+import AiAgentChat from './components/AiAgentChat';
 
 
 // Main App Content (with Auth)
@@ -151,6 +152,9 @@ function AppContent() {
 
       {/* Subscription Modal */}
       <SubscriptionModal />
+
+      {/* AI Agent Chat (only when authenticated) */}
+      {isAuthenticated && <AiAgentChat />}
     </>
   );
 }

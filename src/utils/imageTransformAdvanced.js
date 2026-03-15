@@ -1,5 +1,15 @@
 import { transformImage } from './api.js';
 import axios from 'axios';
+import { analyzePhotoForPrompt } from './agentEngine.js';
+
+// Store the latest photo analysis for prompt refinement
+let _lastPhotoAnalysis = '';
+
+/**
+ * Get the latest photo analysis result
+ * Used by individual transform functions to append refinement
+ */
+export const getLastPhotoAnalysis = () => _lastPhotoAnalysis;
 
 /**
  * Advanced Image Transformation Modes
@@ -467,6 +477,18 @@ export const transformWithMode = async (imageUrl, mode, imageUrl2) => {
   const transformer = transformers[mode];
   if (!transformer) {
     throw new Error(`Unknown transformation mode: ${mode}`);
+  }
+
+  // Prompt Refinement Agent: analyze photo before transformation
+  if (mode !== 'text-only') {
+    try {
+      console.log('🔍 [Prompt Refinement] Analyzing photo...');
+      _lastPhotoAnalysis = await analyzePhotoForPrompt(imageUrl);
+      console.log('✅ [Prompt Refinement] Analysis stored:', _lastPhotoAnalysis);
+    } catch (err) {
+      console.warn('⚠️ [Prompt Refinement] Skipped:', err.message);
+      _lastPhotoAnalysis = '';
+    }
   }
 
   return await transformer();

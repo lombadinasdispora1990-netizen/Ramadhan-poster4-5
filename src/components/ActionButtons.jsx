@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wand2, AlertCircle, CheckCircle2, Sparkles, Image, Type, Box, Paintbrush, Zap, Sword, Theater, Leaf, Shield, UserPlus, Flame, Heart } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
@@ -38,6 +38,9 @@ const ActionButtons = () => {
     consumeCredit,
     setCredits
   } = useAppStore();
+
+  // Ref to hold latest handleGenerate for event listener
+  const handleGenerateRef = useRef(null);
 
   // Handle Generate Poster
   const handleGenerate = async () => {
@@ -226,6 +229,20 @@ const ActionButtons = () => {
       setLoading(false);
     }
   };
+
+  // Keep ref updated for event listener
+  handleGenerateRef.current = handleGenerate;
+
+  // Listen for trigger-generate event from AI Agent chat
+  useEffect(() => {
+    const handler = () => {
+      if (handleGenerateRef.current) {
+        handleGenerateRef.current();
+      }
+    };
+    window.addEventListener('trigger-generate', handler);
+    return () => window.removeEventListener('trigger-generate', handler);
+  }, []);
 
   // Generation mode options
   const modeOptions = [
