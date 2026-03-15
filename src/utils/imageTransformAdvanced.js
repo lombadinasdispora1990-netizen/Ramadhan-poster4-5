@@ -319,6 +319,63 @@ export const transformToPalestine = async (imageUrl, imageUrl2) => {
 };
 
 /**
+ * Transform image to ONIC Esports jersey style
+ */
+export const transformToOnic = async (imageUrl, imageUrl2) => {
+  try {
+    console.log('🎨 Transforming to ONIC Esports style...');
+    const gender = await analyzeImageForStyle(imageUrl);
+    const identityPreservation = ', CRITICAL IDENTITY PRESERVATION: The face must be an EXACT photographic replica of the person in the reference photos, 0% artistic alteration to the face, maintain identical eye shape, eyebrow thickness and shape, nose structure, and lip contour';
+
+    const prompt = `Medium shot of this person as a professional ONIC Esports player, character centered and positioned lower in the frame with dramatic arena lighting above, ${gender === 'male' ? 'wearing the iconic black-and-orange ONIC Esports team jersey with sponsor logos, gaming headset around neck, confident champion pose' : 'wearing the iconic black-and-orange ONIC Esports team jersey with sponsor logos, stylish gaming headset, hijab in matching black color, confident champion pose'}, background of an epic esports tournament arena stage with massive LED screens displaying ONIC logo, dramatic purple and orange stage lighting, confetti falling, cheering crowd silhouettes, holding a trophy or making a victory gesture, professional gaming atmosphere, cinematic esports photography, Ramadan crescent moon watermark on jersey${identityPreservation}`;
+
+    const result = await transformImage(imageUrl, 'lebaran', gender, prompt, imageUrl2);
+    return result;
+  } catch (error) {
+    console.error('ONIC transformation failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Transform image to Di Mekkah (Mecca) style
+ */
+export const transformToMekkah = async (imageUrl, imageUrl2) => {
+  try {
+    console.log('🎨 Transforming to Mekkah style...');
+    const gender = await analyzeImageForStyle(imageUrl);
+    const identityPreservation = ', CRITICAL IDENTITY PRESERVATION: The face must be an EXACT photographic replica of the person in the reference photos, 0% artistic alteration to the face, maintain identical eye shape, eyebrow thickness and shape, nose structure, and lip contour';
+
+    const prompt = `Medium shot of this person performing Umrah or Hajj at Masjidil Haram in Mecca, character centered and positioned lower in the frame with the majestic Ka'bah clearly visible in the background, ${gender === 'male' ? 'wearing white Ihram cloth (two seamless white garments), serene and humble expression, hands raised in dua (supplication)' : 'wearing elegant white gamis and white hijab (mukena), serene and humble expression, hands raised in dua (supplication)'}, background of the magnificent Masjidil Haram with the Ka'bah draped in black Kiswah with gold calligraphy, thousands of pilgrims performing tawaf, the iconic minarets and clock tower visible, warm golden hour light, deeply spiritual and peaceful atmosphere, cinematic photography, photorealistic masterpiece, massive head room${identityPreservation}`;
+
+    const result = await transformImage(imageUrl, 'lebaran', gender, prompt, imageUrl2);
+    return result;
+  } catch (error) {
+    console.error('Mekkah transformation failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Transform image to Di Madinah (Medina) style
+ */
+export const transformToMadinah = async (imageUrl, imageUrl2) => {
+  try {
+    console.log('🎨 Transforming to Madinah style...');
+    const gender = await analyzeImageForStyle(imageUrl);
+    const identityPreservation = ', CRITICAL IDENTITY PRESERVATION: The face must be an EXACT photographic replica of the person in the reference photos, 0% artistic alteration to the face, maintain identical eye shape, eyebrow thickness and shape, nose structure, and lip contour';
+
+    const prompt = `Medium shot of this person visiting Masjid Nabawi (Prophet's Mosque) in Madinah, character centered and positioned lower in the frame with the iconic green dome clearly visible in the background, ${gender === 'male' ? 'wearing a clean white thobe (jubba) and white prayer cap, peaceful and grateful expression' : 'wearing a beautiful modest white gamis and soft pastel hijab, peaceful and grateful expression'}, background of the magnificent Masjid Nabawi with its iconic green dome, beautiful white marble columns and arches, rows of open umbrellas in the courtyard, soft twilight sky with stars appearing, warm and serene atmosphere, deeply spiritual and peaceful mood, cinematic photography, photorealistic masterpiece, massive head room${identityPreservation}`;
+
+    const result = await transformImage(imageUrl, 'lebaran', gender, prompt, imageUrl2);
+    return result;
+  } catch (error) {
+    console.error('Madinah transformation failed:', error);
+    throw error;
+  }
+};
+
+/**
  * Analyze image for style-appropriate gender detection
  */
 const analyzeImageForStyle = async (imageUrl) => {
@@ -402,6 +459,9 @@ export const transformWithMode = async (imageUrl, mode, imageUrl2) => {
     'cr7': () => transformToCR7(imageUrl, imageUrl2),
     'kpop': () => transformToKpopDemonHunter(imageUrl, imageUrl2),
     'palestine': () => transformToPalestine(imageUrl, imageUrl2),
+    'onic': () => transformToOnic(imageUrl, imageUrl2),
+    'mekkah': () => transformToMekkah(imageUrl, imageUrl2),
+    'madinah': () => transformToMadinah(imageUrl, imageUrl2),
   };
 
   const transformer = transformers[mode];
@@ -429,5 +489,8 @@ export default {
   transformToCR7,
   transformToKpopDemonHunter,
   transformToPalestine,
+  transformToOnic,
+  transformToMekkah,
+  transformToMadinah,
   transformWithMode,
 };
