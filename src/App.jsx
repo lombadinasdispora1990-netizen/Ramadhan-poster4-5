@@ -95,39 +95,40 @@ function AppContent() {
             </div>
           </section>
 
-          {/* Footer */}
-          <footer className="relative mt-24 pb-10">
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent mb-10" />
-
-            <div className="max-w-7xl mx-auto px-4 md:px-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-900 to-emerald-950 border border-emerald-500/30 flex items-center justify-center">
-                    <span className="text-emerald-100 font-display font-bold text-sm">B</span>
-                  </div>
-                  <div>
-                    <p className="font-display font-semibold text-sm text-white">Barokah<span className="text-emerald-500">Gen</span></p>
-                    <p className="text-[10px] text-slate-600 font-medium uppercase tracking-widest">Premium AI Poster Atelier</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 text-[10px] text-slate-600 uppercase tracking-widest font-bold">
-                  <span>Made by Jayaguna</span>
-                  <span className="w-1 h-1 rounded-full bg-slate-800" />
-                  <span>Powered by Alibaba Cloud AI</span>
-                </div>
-
-                <p className="text-[10px] text-slate-700 font-medium">
-                  © 2026 BarokahGen. All rights reserved.
-                </p>
-              </div>
-            </div>
-          </footer>
         </div>
       ) : (
         // Landing page for non-authenticated users
         <LandingPage onGetStarted={() => setShowAuthModal(true)} />
       )}
+
+      {/* Shared Footer */}
+      <footer className="relative mt-24 pb-10 z-10">
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent mb-10" />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-900 to-emerald-950 border border-emerald-500/30 flex items-center justify-center">
+                <span className="text-emerald-100 font-display font-bold text-sm">B</span>
+              </div>
+              <div>
+                <p className="font-display font-semibold text-sm text-white">Barokah<span className="text-emerald-500">Gen</span></p>
+                <p className="text-[10px] text-slate-600 font-medium uppercase tracking-widest">Premium AI Poster Atelier</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-[10px] text-slate-600 uppercase tracking-widest font-bold text-center md:text-left">
+              <span>Made by Jayaguna</span>
+              <span className="hidden md:block w-1 h-1 rounded-full bg-slate-800" />
+              <span>Powered by Alibaba Cloud AI & Mayar.id</span>
+            </div>
+
+            <p className="text-[10px] text-slate-700 font-medium">
+              © 2026 BarokahGen. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Auth Modal */}
       <AuthModal 
