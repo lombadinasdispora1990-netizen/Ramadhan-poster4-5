@@ -17,30 +17,36 @@ export const AuthProvider = ({ children }) => {
     // Check active sessions on mount with timeout to prevent infinite hang
     const checkUser = async () => {
       try {
-        // Race between auth check and a 5-second timeout
+        // Race between auth check and a 2-second timeout (optimized for speed)
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+          setTimeout(() => reject(new Error('Auth check timeout')), 2000)
         );
 
         const currentUser = await Promise.race([
           getCurrentUser(),
           timeoutPromise
         ]);
-        setUser(currentUser);
+        
+        if (currentUser) {
+          setUser(currentUser);
+        }
       } catch (error) {
-        console.warn('Auth check failed or timed out:', error.message);
-        setUser(null);
+        console.warn('Auth check skipped:', error.message);
       } finally {
+        // ALWAYS stop loading after timeout or fast-check
         setLoading(false);
       }
     };
 
     checkUser();
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
-      setUser(session?.user ?? null);
+    // Listen for auth state changes — handle events efficiently
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
       setLoading(false);
     });
 

@@ -7,7 +7,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    lock: {
+      acquireTimeout: 3000, // Don't wait more than 3s for session lock
+    },
+    lockTimeout: 3000, // Fallback lock timeout
   }
 });
 
@@ -63,11 +67,11 @@ export const signOut = async () => {
  * @returns {Promise<any|null>}
  */
 export const getCurrentUser = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return null;
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  // Use getSession() only — reads from local storage first (fast)
+  // Avoid getUser() which always makes a network call
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error || !session) return null;
+  return session.user;
 };
 
 /**
