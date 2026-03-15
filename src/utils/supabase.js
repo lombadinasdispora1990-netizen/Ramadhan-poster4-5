@@ -7,11 +7,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    lock: {
-      acquireTimeout: 3000, // Don't wait more than 3s for session lock
-    },
-    lockTimeout: 3000, // Fallback lock timeout
+    detectSessionInUrl: true
   }
 });
 

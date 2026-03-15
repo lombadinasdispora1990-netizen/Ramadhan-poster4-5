@@ -112,22 +112,25 @@ export default defineConfig({
     imageProxyPlugin(),
   ],
   server: {
-    port: 3001,
+    port: 5173,
     open: true,
     proxy: {
       // API proxy for Alibaba Cloud text/image generation
       '/api/alibaba': {
         target: 'https://dashscope-intl.aliyuncs.com',
         changeOrigin: true,
-        rewrite: (path) => {
-          const cleaned = path.replace(/^\/api\/alibaba\//, '');
-          return '/' + cleaned;
-        },
+        rewrite: (path) => path.replace(/^\/api\/alibaba/, ''),
       },
       // Compatibility mode endpoints
       '/compatible-mode': {
         target: 'https://dashscope-intl.aliyuncs.com',
         changeOrigin: true,
+      },
+      // Supabase API proxy to bypass CORS during development
+      '/api/supabase': {
+        target: 'https://ceuvbpnozyqhrpjsdnjq.supabase.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/supabase/, ''),
       },
     }
   }
